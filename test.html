@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Books</title>
+</head>
+<body>
+<form>
+    <table>
+        <tr>
+            <th><label for="author">Author</label></th>
+            <td><input id="author" name="author" type="text"></td>
+        </tr>
+        <tr>
+            <th><label for="name">Name</label></th>
+            <td><input id="name" name="name" type="text"></td>
+        </tr>
+        <tr>
+            <th><label for="price">Price</label></th>
+            <td><input id="price" name="price" type="text"></td>
+        </tr>
+        <tr>
+            <th><label for="category">Category</label></th>
+            <td>
+                <select id="category" name="category">
+                    <th:block th:each="c:${categories}">
+                        <option th:text="${c.name}" th:value="${c.id}"></option>
+                    </th:block>
+                </select>
+            </td>
+        </tr>
+        <tr>
+            <th>&nbsp;</th>
+            <td><input onclick="createBook()" type="submit" value="Create"/></td>
+        </tr>
+    </table>
+</form>
+<table id="bookList">
+</table>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+<script>
+    reloadListBook();
+
+    function createBook() {
+        //lay du lieu
+        let author = $('#author').val();
+        let name = $('#name').val();
+        let price = $('#price').val();
+        let category = $('#category').val();
+        let
+            newBook = {
+                author: author,
+                name: name,
+                price: price,
+                category: {id: parseInt(category)}
+            };
+        // Call method ajax
+        $.ajax({
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            type: "POST",
+            data: JSON.stringify(newBook),
+            //tên API
+            url: "/books",
+            //xử lý khi thành công
+            success: function () {
+                alert("Book created successfully")
+                window.location = "/books/list";
+            }
+        });
+        //chặn sự kiện mặc định của thẻ
+        event.preventDefault();
+    }
+
+    function deleteBook(element) {
+        event.preventDefault();
+        let check = confirm("Are you sure?");
+        if (check) {
+            //delete
+            let bookId = element.getAttribute("href");
+            $.ajax({
+                type: "DELETE",
+                url: `/books/${bookId}`,
+                success: showListAfterDelete
+            });
+        }
+    }
+
+    function showListAfterDelete() {
+        alert("Book deleted successfully");
+        reloadListBook();
+    }
+
+    function reloadListBook() {
+        $.ajax({
+            type: "GET",
+            url: `/books`,
+            success: function (data) {
+                let content = '    <tr>\n' +
+                    '        <td>Author</td>\n' +
+                    '        <td>Name</td>\n' +
+                    '        <td>Price</td>\n' +
+                    '        <td>Category</td>\n' +
+                    '        <td>Action</td>\n' +
+                    '    </tr>';
+                for (let i = 0; i < data.length; i++) {
+                    content += getBook(data[i]);
+                }
+                document.getElementById('bookList').innerHTML = content;
+            }
+        });
+    }
+
+    function getBook(book) {
+        let a = `<tr><td>${book.author}</td>
+                <td>${book.name}</td>
+                <td>${book.price}</td>
+                <td>${book.category.name}</td>
+                <td><a>Edit</a>&nbsp;&nbsp;<a onclick="deleteBook(this)" href="${book.id}">Delete</a></td></tr>`;
+        return a;
+    }
+</script>
+</body>
+</html>
