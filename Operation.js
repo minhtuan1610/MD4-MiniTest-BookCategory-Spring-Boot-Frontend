@@ -1,1 +1,2 @@
 displayCategory();
+listBooks();

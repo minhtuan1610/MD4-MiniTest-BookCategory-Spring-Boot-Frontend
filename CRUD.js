@@ -32,9 +32,38 @@ function addBook() {
         data: JSON.stringify(book),
         url: "http://localhost:8080/books",
         success: function () {
-            alert("Book created successfully")
-            // window.location = "/books";
+            alert("Book created successfully");
+            listBooks();
         }
     })
     event.preventDefault();
+}
+
+function listBooks() {
+    $.ajax({
+        type: "GET",
+        url: "http://localhost:8080/books/",
+        success: function (data) {
+            let bookList = '<tr>\n' +
+                '        <th>Author</th>\n' +
+                '        <th>Name</th>\n' +
+                '        <th>Price</th>\n' +
+                '        <th>Category</th>\n' +
+                '        <th>Action</th>\n' +
+                '    </tr>';
+            for (let i = 0; i < data.length; i++) {
+                bookList += getBook(data[i]);
+            }
+            document.getElementById("bookList").innerHTML = bookList;
+        }
+    })
+}
+
+function getBook(book) {
+    let bookChoosen = `<tr><td>${book.author}</td>
+                       <td>${book.name}</td>
+                        <td>${book.price}</td>
+                        <td>${book.category.name}</td>
+                        <td><a href="">Edit</a>&nbsp;<a href="">Delete</a></td></tr>`;
+    return bookChoosen;
 }
