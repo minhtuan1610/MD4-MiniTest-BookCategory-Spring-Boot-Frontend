@@ -64,6 +64,22 @@ function getBook(book) {
                        <td>${book.name}</td>
                         <td>${book.price}</td>
                         <td>${book.category.name}</td>
-                        <td><a href="">Edit</a>&nbsp;<a href="">Delete</a></td></tr>`;
+                        <td><a href="" onclick="">Edit</a>&nbsp;<a href="${book.id}" onclick="deleteBook(this)">Delete</a></td></tr>`;
     return bookChoosen;
+}
+
+function deleteBook(book) {
+    event.preventDefault();
+    let check = confirm("Are you sure?");
+    if (check) {
+        let bookID = book.getAttribute("href");
+        $.ajax({
+            type: "DELETE",
+            url: `http://localhost:8080/books/${bookID}`,
+            success: function () {
+                alert("Book deleted successfully")
+                listBooks();
+            }
+        })
+    }
 }
