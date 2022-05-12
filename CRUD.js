@@ -17,14 +17,31 @@ function addBook() {
     let name = $(`#name`).val();
     let price = $(`#price`).val();
     let category_id = $(`#category`).val();
-    let book = {
+    let image = $(`#image`);
+    let bookForm = new FormData();
+    bookForm.append('author', author);
+    bookForm.append('name', name);
+    bookForm.append('price', price);
+    bookForm.append('category', category_id);
+    bookForm.append('image', image.prop('files')[0]); //lấy file ở vị trí thứ 0
+    /*let book = {
         author: author,
         name: name,
         price: price,
         category: {id: parseInt(category_id)}
-    };
+    };*/
     $.ajax({
-        headers: {
+        type: "POST",
+        enctype: 'multipart/form-data',
+        processData: false,
+        contentType: false,
+        data: bookForm,
+        url: "http://localhost:8080/books",
+        success: function () {
+            alert("Book created successfully");
+            listBooks();
+        }
+        /*headers: {
             'Accept': 'application/json',
             'Content-Type': 'application/json'
         },
@@ -34,7 +51,7 @@ function addBook() {
         success: function () {
             alert("Book created successfully");
             listBooks();
-        }
+        }*/
     })
     event.preventDefault();
 }
@@ -49,6 +66,7 @@ function listBooks() {
                 '        <th>Name</th>\n' +
                 '        <th>Price</th>\n' +
                 '        <th>Category</th>\n' +
+                '        <th>Image</th>\n' +
                 '        <th>Action</th>\n' +
                 '    </tr>';
             for (let i = 0; i < data.length; i++) {
@@ -64,6 +82,7 @@ function getBook(book) {
                        <td>${book.name}</td>
                         <td>${book.price}</td>
                         <td>${book.category.name}</td>
+                        <td><img src="${'http://localhost:8080/image/' + book.image}" width="100px"></td>
                         <td><a href="${book.id}" onclick="showBookForm(${book.id})">Edit</a>&nbsp;<a href="${book.id}" onclick="deleteBook(this)">Delete</a></td></tr>`;
     return bookChoosen;
 }
@@ -111,6 +130,11 @@ function showBookForm(id) {
                 <td><select id="category1" name="category1"></select></td>
             </tr>
             <tr>
+                <th><label for="image1">Image:</label></th>
+                <td><img src="${'http://localhost:8080/image/' + data.image}" width="100px"></td>
+                <td><input id="image1" type="file"></td>
+            </tr>
+            <tr>
                 <th>&nbsp;</th>
                 <td><input onclick="editBook(${data.id})" type="button" value="Update book"></td>
             </tr>
@@ -141,14 +165,27 @@ function editBook(id) {
     let name = $(`#name1`).val();
     let price = $(`#price1`).val();
     let category = $(`#category1`).val();
-    let bookEdit = {
+    let image = $(`#image1`);
+    /*let bookEdit = {
         "author": author,
         "name": name,
         "price": price,
         "category": {"id": category}
-    };
+    };*/
+    let existBook = new FormData();
+    existBook.append('author', author);
+    existBook.append('name', name);
+    existBook.append('price', price);
+    existBook.append('category', category);
+    let image1 = image.prop('files')[0];
+    if (image1 === undefined) {
+        let file = new File([""], "fileName.jpg");
+        existBook.append('image', file);
+    } else {
+        existBook.append('image', image1);
+    }
     $.ajax({
-        headers: {
+        /*headers: {
             'Accept': 'application/json',
             'Content-Type': 'application/json'
         },
@@ -158,7 +195,18 @@ function editBook(id) {
         success: function () {
             alert("Book updated successfully");
             listBooks();
+        }*/
+        type: "POST",
+        enctype: 'multipart/form-data',
+        processData: false,
+        contentType: false,
+        data: existBook,
+        url: `http://localhost:8080/books/${id}`,
+        success: function () {
+            alert("Book updated successfully");
+            listBooks();
         }
     });
+    event.preventDefault();
 }
 
